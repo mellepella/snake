@@ -19,9 +19,11 @@ class Vector {
     this.y = y;
   }
 
-  add(vector) {
-    this.x = this.x + vector.x;
-    this.y = this.y + vector.y;
+  static add(first, second) {
+    return new Vector(
+      first.x + second.x,
+      first.y + second.y
+    );
   }
 
   static get down() {
@@ -49,7 +51,7 @@ class Snake {
   constructor() {
     this.position = new Vector(100, 100);
     this.direction = Vector.right;
-    this.tail = new Tail(new Vector(75, 100));
+    this.tail = new Tail(new Vector(75, 100), this, 0);
   }
 
   update() {
@@ -59,7 +61,7 @@ class Snake {
   }
 
   move() {
-    this.position.add(this.direction);
+    this.position = Vector.add(this.position, this.direction);
   }
 
   draw() {
@@ -69,8 +71,12 @@ class Snake {
 }
 
 class Tail {
-  constructor(position) {
+  constructor(position, parent, currentSize) {
     this.position = position;
+    this.parent = parent;
+    if (currentSize < startSize) {
+      this.tail = new Tail(this.position, this, currentSize + 1);
+    }
   }
 
   draw() {
@@ -80,17 +86,19 @@ class Tail {
 
   move() {
     this.position = new Vector(
-      snake.position.x,
-      snake.position.y
+      this.parent.position.x,
+      this.parent.position.y
     );
   }
 
   update() {
+    if (this.tail) { this.tail.update(); }
     this.move();
     this.draw();
   }
 }
-
+var startSize = 5;
+var score = 0;
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
 var board = new Board();
